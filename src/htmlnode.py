@@ -54,6 +54,14 @@ class LeafNode(HTMLNode):
 
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
+        if tag == "":
+            raise ValueError("Tag cannot be an empty srting")
+        if len(children) == 0:
+            raise ValueError("Children cannot be an empty list")
+        for child in children:
+            if not isinstance(child, HTMLNode):
+                raise TypeError("All children must be HTMLNode instances")
+
         super().__init__(tag=tag, children=children, props=props)
 
     def __render_childs(self):
