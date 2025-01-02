@@ -1,6 +1,6 @@
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
-        if tag == None and value == None and children == None and props == None:
+        if tag is None and value is None and children is None and props is None:
             raise Exception("HTMLNode cannot be empty")
         self.tag = tag
         self.value = value
@@ -26,14 +26,27 @@ class HTMLNode:
 
     def __repr__(self):
         repr = "HTMLNode {\n"
-        if self.tag:
-            repr += f"\ttag: {self.tag}\n"
-        if self.value:
-            repr += f"\tvalue: {self.value}\n"
-        if self.children:
-            repr += f"\tchildren: {self.children}\n"
-        if self.props:
-            repr += f"\tprops: {self.props_to_html()}\n"
+
+        for key, value in self.__dict__.items():
+            if not value:
+                continue
+            if key == "props":
+                repr += f"\tprops: {self.props_to_html()}\n"
+            else:
+                repr += f"\t{key}: {value}\n"
         repr += "}"
 
         return repr
+
+
+class LeafNode(HTMLNode):
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag=tag, value=value, props=props)
+
+    def to_html(self):
+        if not self.value:
+            raise ValueError("A leaf node must have a value")
+        if not self.tag:
+            return f"{self.value}"
+        else:
+            return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
