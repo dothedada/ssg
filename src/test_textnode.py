@@ -10,18 +10,18 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(node_a, node_b)
 
     def test_eq_link(self):
-        node_a = TextNode("This is a link node", TextType.LINKS, "https://mmejia.com")
-        node_b = TextNode("This is a link node", "links", "https://mmejia.com")
+        node_a = TextNode("link node", TextType.LINKS, "https://mmejia.com")
+        node_b = TextNode("link node", "links", "https://mmejia.com")
         self.assertEqual(node_a, node_b)
 
-    def test_eq(self):
+    def test_diff_eq(self):
         node_a = TextNode("This is a bold node", TextType.BOLD_TEXT)
         node_b = TextNode("This is another bold node", "bold")
         self.assertNotEqual(node_a, node_b)
 
     def test_diff_link(self):
-        node_a = TextNode("This is a link", TextType.LINKS, "https://mmejia.com")
-        node_b = TextNode("This is another link", "links", "https://cv.mmejia.com")
+        node_a = TextNode("link node", TextType.LINKS, "https://mmejia.com")
+        node_b = TextNode("other link node", "links", "https://cv.mmejia.com")
         self.assertNotEqual(node_a, node_b)
 
 
