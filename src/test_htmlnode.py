@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, LeafNode
 
 
 class HTMLNodeTest(unittest.TestCase):
@@ -38,6 +38,27 @@ class HTMLNodeTest(unittest.TestCase):
             "}"
         )
         self.assertEqual(repr(html_node), expected)
+
+
+class LeafNodeTest(unittest.TestCase):
+    def test_allways_passValue(self):
+        with self.assertRaises(TypeError):
+            LeafNode()
+
+    def test_tag_none_renders_text(self):
+        text = "some random text"
+        leaf_node = LeafNode(tag=None, value=text)
+        self.assertTrue(text in leaf_node.to_html())
+
+    def test_tag_renders_html_label(self):
+        tag = "a"
+        text = "link"
+        props = {"href": "https://mmejia.com", "target": "_blank"}
+        leaf_node = LeafNode(tag=tag, value=text, props=props)
+        print(leaf_node.to_html())
+        self.assertEqual(
+            leaf_node.to_html(), '<a href="https://mmejia.com" target="_blank">link</a>'
+        )
 
 
 if __name__ == "__main__":
