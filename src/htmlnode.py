@@ -11,14 +11,14 @@ class HTMLNode:
         if isinstance(props, dict):
             self.props = props
         else:
-            self.props = None
+            self.props = ""
 
     def to_html(self):
         raise NotImplementedError()
 
     def props_to_html(self):
         if not self.props:
-            return "No props to parse"
+            return self.props
         element_props = ""
         for prop in self.props:
             element_props += f' {prop}="{self.props[prop]}"'
@@ -56,7 +56,7 @@ class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
         super().__init__(tag=tag, children=children, props=props)
 
-    def render_childs(self):
+    def __render_childs(self):
         childs_rendered = ""
         for child in self.children:
             if not isinstance(child, HTMLNode):
@@ -67,6 +67,6 @@ class ParentNode(HTMLNode):
     def to_html(self):
         if not self.tag:
             raise ValueError("ParentNode must have a tag")
-        if not self.children or len(self.children):
+        if not self.children or not len(self.children):
             raise ValueError("ParentNode must have at least one child node")
-        return f"<{self.tag}{self.props}>{self.render_childs}</{self.tag}>"
+        return f"<{self.tag}{self.props}>{self.__render_childs()}</{self.tag}>"
