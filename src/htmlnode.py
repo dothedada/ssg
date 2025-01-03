@@ -60,15 +60,13 @@ class ParentNode(HTMLNode):
             raise ValueError("Children cannot be an empty list")
         for child in children:
             if not isinstance(child, HTMLNode):
-                raise TypeError("All children must be HTMLNode instances")
+                raise TypeError(f"Child nodes must be HTMLNode instances: {child}.")
 
         super().__init__(tag=tag, children=children, props=props)
 
     def __render_childs(self):
         childs_rendered = ""
         for child in self.children:
-            if not isinstance(child, HTMLNode):
-                raise TypeError(f"Child nodes must be HTMLNode instances: {child}.")
             childs_rendered += child.to_html()
         return childs_rendered
 
