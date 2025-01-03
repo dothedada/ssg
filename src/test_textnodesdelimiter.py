@@ -1,5 +1,9 @@
 import unittest
-from splitnodesdelimiter import split_nodes_delimiter
+from splitnodesdelimiter import (
+    split_nodes_delimiter,
+    extract_markdown_images,
+    extract_markdown_links,
+)
 from textnode import TextNode, TextType
 
 
@@ -63,3 +67,83 @@ class TestNodesSplitter(unittest.TestCase):
         new_nodes = split_nodes_delimiter([], "**", TextType.BOLD_TEXT)
         self.assertIsInstance(new_nodes, list)
         self.assertEqual(len(new_nodes), 0)
+
+
+class ExtractMarkdownImg(unittest.TestCase):
+    def test_returns_list_with_tuples(self):
+        text = (
+            "text ![alt_text_1](https://url.com/1) and ![alt_text_2](https://url.com/2)"
+        )
+        image_links = extract_markdown_images(text)
+        self.assertEqual(len(image_links), 2)
+        self.assertIsInstance(image_links, list)
+        for link in image_links:
+            self.assertIsInstance(link, tuple)
+
+    def test_handle_images_without_altText(self):
+        text = "text ![](https://url.com/1)"
+        image_links = extract_markdown_images(text)
+        self.assertEqual(len(image_links), 1)
+        self.assertEqual(image_links[0][0], "")
+        self.assertEqual(image_links[0][1], "https://url.com/1")
+
+    def test_raise_error_for_images_without_url(self):
+        text = "text ![alt_text_1]()"
+        with self.assertRaises(ValueError):
+            extract_markdown_images(text)
+
+    def test_returns_empty_list_if_text_empty(self):
+        text = ""
+        image_links = extract_markdown_images(text)
+        self.assertEqual(len(image_links), 0)
+
+    def test_data_order_is_alt_text_followed_by_url(self):
+        text = "text ![alt_text_1](https://url.com/1)"
+        image_links = extract_markdown_images(text)
+        self.assertEqual(image_links[0][0], "alt_text_1")
+        self.assertEqual(image_links[0][1], "https://url.com/1")
+
+    def test_dont_parse_links_data_type(self):
+        text = "text [link_name](https://url.com/1)"
+        image_links = extract_markdown_images(text)
+        self.assertEqual(len(image_links), 0)
+
+
+class ExtractMarkdownLink(unittest.TestCase):
+    def test_returns_list_with_tuples(self):
+        text = (
+            "text [link_text_1](https://url.com/1) and [link_text_2](https://url.com/2)"
+        )
+        link_links = extract_markdown_links(text)
+        self.assertEqual(len(link_links), 2)
+        self.assertIsInstance(link_links, list)
+        for link in link_links:
+            self.assertIsInstance(link, tuple)
+
+    def test_use_url_as_text_if_no_link_text_is_provided(self):
+        text = "text [](https://url.com/1)"
+        image_links = extract_markdown_links(text)
+        self.assertEqual(len(image_links), 1)
+        self.assertEqual(image_links[0][0], "https://url.com/1")
+        self.assertEqual(image_links[0][1], "https://url.com/1")
+
+    def test_raise_error_links_without_url(self):
+        text = "text [alt_text_1]()"
+        with self.assertRaises(ValueError):
+            extract_markdown_links(text)
+
+    def test_returns_empty_list_if_text_empty(self):
+        text = ""
+        link_links = extract_markdown_links(text)
+        self.assertEqual(len(link_links), 0)
+
+    def test_data_order_is_alt_text_followed_by_url(self):
+        text = "text [link_text_1](https://url.com/1)"
+        link_links = extract_markdown_links(text)
+        self.assertEqual(link_links[0][0], "link_text_1")
+        self.assertEqual(link_links[0][1], "https://url.com/1")
+
+    def test_dont_parse_links_data_type(self):
+        text = "text ![link_name](https://url.com/1)"
+        link_links = extract_markdown_links(text)
+        self.assertEqual(len(link_links), 0)
