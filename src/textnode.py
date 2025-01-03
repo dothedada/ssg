@@ -3,11 +3,11 @@ from htmlnode import LeafNode
 
 
 class TextType(Enum):
-    NORMAL_TEXT = "normal"
-    BOLD_TEXT = "bold"
-    ITALIC_TEXT = "italic"
-    CODE_TEXT = "code"
-    LINKS = "links"
+    NORMAL = "normal"
+    BOLD = "bold"
+    ITALIC = "italic"
+    CODE = "code"
+    LINK = "links"
     IMAGE = "images"
 
 
@@ -39,15 +39,15 @@ def text_node_to_html_node(text_node):
         raise TypeError(f"The argument {text_node} is not a TextNode type")
 
     match (text_node.text_type):
-        case TextType.NORMAL_TEXT:
+        case TextType.NORMAL:
             return LeafNode(tag="", value=text_node.text)
-        case TextType.BOLD_TEXT:
+        case TextType.BOLD:
             return LeafNode(tag="b", value=text_node.text)
-        case TextType.ITALIC_TEXT:
+        case TextType.ITALIC:
             return LeafNode(tag="i", value=text_node.text)
-        case TextType.CODE_TEXT:
+        case TextType.CODE:
             return LeafNode(tag="code", value=text_node.text)
-        case TextType.LINKS:
+        case TextType.LINK:
             return LeafNode(
                 tag="a", value=text_node.text, props={"href": text_node.url}
             )

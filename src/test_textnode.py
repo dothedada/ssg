@@ -5,22 +5,22 @@ from textnode import TextNode, TextType, text_node_to_html_node
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
-        node_a = TextNode("This is a bold node", TextType.BOLD_TEXT)
+        node_a = TextNode("This is a bold node", TextType.BOLD)
         node_b = TextNode("This is a bold node", "bold")
         self.assertEqual(node_a, node_b)
 
     def test_eq_link(self):
-        node_a = TextNode("link node", TextType.LINKS, "https://mmejia.com")
+        node_a = TextNode("link node", TextType.LINK, "https://mmejia.com")
         node_b = TextNode("link node", "links", "https://mmejia.com")
         self.assertEqual(node_a, node_b)
 
     def test_diff_eq(self):
-        node_a = TextNode("This is a bold node", TextType.BOLD_TEXT)
+        node_a = TextNode("This is a bold node", TextType.BOLD)
         node_b = TextNode("This is another bold node", "bold")
         self.assertNotEqual(node_a, node_b)
 
     def test_diff_link(self):
-        node_a = TextNode("link node", TextType.LINKS, "https://mmejia.com")
+        node_a = TextNode("link node", TextType.LINK, "https://mmejia.com")
         node_b = TextNode("other link node", "links", "https://cv.mmejia.com")
         self.assertNotEqual(node_a, node_b)
 
@@ -39,13 +39,13 @@ class TestTextNodeToHtmlNode(unittest.TestCase):
             text_node_to_html_node(None)
 
     def test_create_raw_text_node(self):
-        text_node = TextNode("sample text", TextType.NORMAL_TEXT)
+        text_node = TextNode("sample text", TextType.NORMAL)
         html_node = text_node_to_html_node(text_node)
         self.assertEqual(html_node.tag, "")
         self.assertEqual(html_node.value, "sample text")
 
     def test_create_bold_text_node(self):
-        text_node = TextNode("sample bold text", TextType.BOLD_TEXT)
+        text_node = TextNode("sample bold text", TextType.BOLD)
         html_node = text_node_to_html_node(text_node)
         self.assertEqual(html_node.tag, "b")
         self.assertEqual(html_node.value, "sample bold text")
