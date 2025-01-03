@@ -1,5 +1,5 @@
 import unittest
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class HTMLNodeTest(unittest.TestCase):
@@ -45,19 +45,95 @@ class LeafNodeTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             LeafNode()
 
+    def test_tag_empty_renders_text_with_no_tag(self):
+        tag = ""
+        text = "some random text"
+        leaf_node = LeafNode(tag=tag, value=text)
+        self.assertTrue(text in leaf_node.to_html())
+        self.assertFalse("<" in leaf_node.to_html())
+
     def test_tag_none_renders_text(self):
         text = "some random text"
         leaf_node = LeafNode(tag=None, value=text)
         self.assertTrue(text in leaf_node.to_html())
+
+    def test_tag_empty_string(self):
+        tag = ""
+        text = "some random text"
+        leaf_node = LeafNode(tag=tag, value=text)
+        self.assertFalse("<" in leaf_node.to_html())
 
     def test_tag_renders_html_label(self):
         tag = "a"
         text = "link"
         props = {"href": "https://mmejia.com", "target": "_blank"}
         leaf_node = LeafNode(tag=tag, value=text, props=props)
-        print(leaf_node.to_html())
         self.assertEqual(
             leaf_node.to_html(), '<a href="https://mmejia.com" target="_blank">link</a>'
+        )
+
+
+class ParentNodeTest(unittest.TestCase):
+    def test_ParentNode_is_instance_of_HTMLNode(self):
+        parent_node = ParentNode(
+            tag="p", children=[LeafNode(tag="b", value="some text")]
+        )
+        self.assertIsInstance(parent_node, HTMLNode)
+
+    def test_tag_cannot_be_empty_string(self):
+        tag = ""
+        children = [
+            LeafNode("a", "random text"),
+        ]
+        with self.assertRaises(ValueError):
+            ParentNode(tag, children=children)
+
+    def test_children_must_be_passed(self):
+        tag = "div"
+        children = []
+        with self.assertRaises(ValueError):
+            ParentNode(tag, children=children)
+
+    def test_all_children_must_be_HTMLNode_instances(self):
+        tag = "div"
+        children = [
+            LeafNode("a", "random text"),
+            "abc",
+            LeafNode("a", "more random text"),
+        ]
+        with self.assertRaises(TypeError):
+            ParentNode(tag, children=children)
+
+    def test_parent_can_handle_nested_ParentNode(self):
+        leaf_nodes = [
+            LeafNode("b", "Bold text"),
+            LeafNode(None, "Normal text"),
+            LeafNode("i", "italic text"),
+        ]
+        childs = []
+        childs.append(ParentNode(tag="p", children=leaf_nodes))
+        childs.append(LeafNode("p", "Normal text"))
+        node = ParentNode(tag="div", children=childs)
+
+        self.assertEqual(
+            node.to_html(),
+            "<div><p><b>Bold text</b>Normal text<i>italic text</i></p><p>Normal text</p></div>",
+        )
+
+    def test_parent_can_handle_multiple_LeafNode(self):
+        child_nodes = [
+            LeafNode("b", "Bold text"),
+            LeafNode(None, "Normal text"),
+            LeafNode("i", "italic text"),
+            LeafNode(None, "Normal text"),
+        ]
+        node = ParentNode(
+            tag="p",
+            children=child_nodes,
+        )
+        self.assertEqual(
+            node.to_html(),
+            "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>",
         )
 
 
