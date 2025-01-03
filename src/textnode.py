@@ -21,7 +21,6 @@ class TextNode:
                 self.text_type = TextType(text_type)
             except ValueError:
                 raise ValueError(f"Invalid text type: {text_type}")
-
         self.url = url
 
     def __eq__(self, other):
@@ -36,6 +35,9 @@ class TextNode:
 
 
 def text_node_to_html_node(text_node):
+    if not isinstance(text_node, TextNode):
+        raise TypeError(f"The argument {text_node} is not a TextNode type")
+
     match (text_node.text_type):
         case TextType.NORMAL_TEXT:
             return LeafNode(tag="", value=text_node.text)
@@ -53,7 +55,5 @@ def text_node_to_html_node(text_node):
             return LeafNode(
                 tag="img",
                 value="",
-                props={"src": text_node.url, "alt": text_node.value},
+                props={"src": text_node.url, "alt": text_node.text},
             )
-        case _:
-            raise Exception("Invalid TextNode")
