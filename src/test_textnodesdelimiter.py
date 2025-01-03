@@ -333,3 +333,7 @@ class SplitNodesForLinks(unittest.TestCase):
                 TextNode(" and ![alt_text](www.url2.com)", TextType.NORMAL),
             ],
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
