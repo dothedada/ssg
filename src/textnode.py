@@ -1,5 +1,10 @@
 from enum import Enum
 from htmlnode import LeafNode
+from splitnodesdelimiter import (
+    split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+)
 
 
 class TextType(Enum):
@@ -57,3 +62,14 @@ def text_node_to_html_node(text_node):
                 value="",
                 props={"src": text_node.url, "alt": text_node.text},
             )
+
+
+def text_to_textnodes(text):
+    nodes = TextNode(text, TextType.NORMAL)
+    nodes = split_nodes_delimiter([nodes], "**", TextType.BOLD)
+    nodes = split_nodes_delimiter([nodes], "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter([nodes], "`", TextType.CODE)
+    nodes = split_nodes_image([nodes])
+    nodes = split_nodes_link([nodes])
+
+    return nodes
