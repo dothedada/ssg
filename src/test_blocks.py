@@ -40,6 +40,72 @@ block1
 block1
 block1
 """
-
         blocks = markdown_to_blocks(markdown)
         self.assertEqual(len(blocks), 1)
+
+    def test_strips_whitespace(self):
+        markdown = "  block1  \n\n   block2   \n\nblock3\t\n\nblock4\n"
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(blocks[0], "block1")
+        self.assertEqual(blocks[1], "block2")
+        self.assertEqual(blocks[2], "block3")
+        self.assertEqual(blocks[3], "block4")
+
+    def test_mixed_whitespace(self):
+        markdown = "\t  block1\n \t \n\nblock2\t \n"
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0], "block1")
+        self.assertEqual(blocks[1], "block2")
+
+    def test_leading_blank_lines(self):
+        markdown = """
+
+
+        # First block"""
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual(blocks[0], "# First block")
+
+    def test_trailing_blank_lines(self):
+        markdown = """# Last block
+
+
+
+        """
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 1)
+        self.assertEqual(blocks[0], "# Last block")
+
+    def test_mixed_whitespace_between_blocks(self):
+        markdown = """block1
+     
+    \t
+    \t  
+    block2"""
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0], "block1")
+        self.assertEqual(blocks[1], "block2")
+
+    def test_preserve_internal_whitespace(self):
+        markdown = """# Block with    spaces
+    and\ttabs
+    intact
+
+# Next block"""
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0], "# Block with    spaces\n    and\ttabs\n    intact")
+
+    def test_complex_whitespace(self):
+        markdown = """   
+block1
+\t  
+   \t
+block2
+  """
+        blocks = markdown_to_blocks(markdown)
+        self.assertEqual(len(blocks), 2)
+        self.assertEqual(blocks[0], "block1")
+        self.assertEqual(blocks[1], "block2")
