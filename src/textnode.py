@@ -21,6 +21,7 @@ class TextNode:
                 self.text_type = TextType(text_type)
             except ValueError:
                 raise ValueError(f"Invalid text type: {text_type}")
+
         self.url = url
 
     def __eq__(self, other):
