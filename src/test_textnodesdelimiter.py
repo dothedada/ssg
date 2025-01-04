@@ -53,11 +53,6 @@ class TestNodesSplitter(unittest.TestCase):
         with self.assertRaises(Exception):
             split_nodes_delimiter([text_node], "**", TextType.BOLD)
 
-    def test_ignores_empty_delimiters(self):
-        text_node = TextNode("text ** **, more text", TextType.NORMAL)
-        new_nodes = split_nodes_delimiter([text_node], "**", TextType.BOLD)
-        self.assertEqual(len(new_nodes), 1)
-
     def text_empty_nodes_list_return_empty_list(self):
         new_nodes = split_nodes_delimiter([], "**", TextType.BOLD)
         self.assertIsInstance(new_nodes, list)
@@ -355,9 +350,9 @@ class SplitNodesForLinks(unittest.TestCase):
 
 
 class TextToTextnode(unittest.TestCase):
-    def test_print(self):
+    def test_base_output(self):
         text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
-        self.assertEquals(
+        self.assertEqual(
             text_to_textnodes(text),
             [
                 TextNode("This is ", TextType.NORMAL),
@@ -372,6 +367,51 @@ class TextToTextnode(unittest.TestCase):
                 ),
                 TextNode(" and a ", TextType.NORMAL),
                 TextNode("link", TextType.LINK, "https://boot.dev"),
+            ],
+        )
+
+    def test_only_one_type_of_text(self):
+        text = "![image alt](https://some.url)"
+        self.assertEqual(
+            text_to_textnodes(text),
+            [
+                TextNode("image alt", TextType.IMAGE, "https://some.url"),
+            ],
+        )
+
+    def test_bold_italic_bold(self):
+        text = "**bold** *italic* **more bold**"
+        self.assertEqual(
+            text_to_textnodes(text),
+            [
+                TextNode("bold", TextType.BOLD),
+                TextNode(" ", TextType.NORMAL),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" ", TextType.NORMAL),
+                TextNode("more bold", TextType.BOLD),
+            ],
+        )
+
+    # def test_bold_italic_bold_no_space(self):
+    #     text = "**bold***italic***more bold**"
+    #     self.assertEqual(
+    #         text_to_textnodes(text),
+    #         [
+    #             TextNode("bold", TextType.BOLD),
+    #             TextNode(" ", TextType.NORMAL),
+    #             TextNode("italic", TextType.ITALIC),
+    #             TextNode(" ", TextType.NORMAL),
+    #             TextNode("more bold", TextType.BOLD),
+    #         ],
+    #     )
+
+    def test_not_nomal_text(self):
+        text = "**text**![image alt](https://some.url)"
+        self.assertEqual(
+            text_to_textnodes(text),
+            [
+                TextNode("text", TextType.BOLD),
+                TextNode("image alt", TextType.IMAGE, "https://some.url"),
             ],
         )
 

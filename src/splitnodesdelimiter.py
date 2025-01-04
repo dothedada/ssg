@@ -22,12 +22,6 @@ def split_nodes_delimiter(old_nodes, delimiter, type_text):
             if not text_split[i]:
                 continue
 
-            if not len(text_split[i].strip()):
-                last_string = new_nodes[len(new_nodes) - 1].text
-                text_split[i + 1] = last_string + text_split[i + 1]
-                new_nodes.pop(len(new_nodes) - 1)
-                continue
-
             if i % 2 == 0:
                 new_nodes.append(TextNode(text_split[i], TextType.NORMAL))
             else:
@@ -133,5 +127,4 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     nodes = split_nodes_image(nodes)
 
-    print(nodes)
     return nodes
