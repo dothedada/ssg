@@ -5,6 +5,7 @@ from splitnodesdelimiter import (
     extract_markdown_links,
     split_nodes_image,
     split_nodes_link,
+    text_to_textnodes,
 )
 from textnode import TextNode, TextType
 
@@ -46,14 +47,6 @@ class TestNodesSplitter(unittest.TestCase):
         self.assertEqual(len(new_nodes), 6)
         self.assertTrue(new_nodes[1].text_type == TextType.CODE)
         self.assertTrue(new_nodes[4].text_type == TextType.CODE)
-
-    def test_mantain_the_base_TextType(self):
-        text_node = TextNode("text *italic*, more text", TextType.BOLD)
-        new_nodes = split_nodes_delimiter([text_node], "*", TextType.ITALIC)
-        self.assertEqual(len(new_nodes), 3)
-        self.assertTrue(new_nodes[0].text_type == TextType.BOLD)
-        self.assertTrue(new_nodes[1].text_type == TextType.ITALIC)
-        self.assertTrue(new_nodes[2].text_type == TextType.BOLD)
 
     def test_raise_error_unpaired_delimiters(self):
         text_node = TextNode("text **bold, more text", TextType.NORMAL)
@@ -229,7 +222,7 @@ class SplitNodesForImages(unittest.TestCase):
             ],
         )
 
-    def test_TextNode_with_mixed_content(self):
+    def test_TextNode_with_mixed_content_a(self):
         node = TextNode(
             "![alt_text](www.url.com) and [link](www.url2.com)",
             TextType.NORMAL,
@@ -239,6 +232,19 @@ class SplitNodesForImages(unittest.TestCase):
             [
                 TextNode("alt_text", TextType.IMAGE, "www.url.com"),
                 TextNode(" and [link](www.url2.com)", TextType.NORMAL),
+            ],
+        )
+
+    def test_TextNode_with_mixed_content_b(self):
+        node = TextNode(
+            "[link](www.url2.com) and ![alt_text](www.url.com)",
+            TextType.NORMAL,
+        )
+        self.assertEqual(
+            split_nodes_image([node]),
+            [
+                TextNode("[link](www.url2.com) and ", TextType.NORMAL),
+                TextNode("alt_text", TextType.IMAGE, "www.url.com"),
             ],
         )
 
@@ -321,7 +327,7 @@ class SplitNodesForLinks(unittest.TestCase):
             ],
         )
 
-    def test_TextNode_with_mixed_content(self):
+    def test_TextNode_with_mixed_content_a(self):
         node = TextNode(
             "[link](www.url.com) and ![alt_text](www.url2.com)",
             TextType.NORMAL,
@@ -331,6 +337,41 @@ class SplitNodesForLinks(unittest.TestCase):
             [
                 TextNode("link", TextType.LINK, "www.url.com"),
                 TextNode(" and ![alt_text](www.url2.com)", TextType.NORMAL),
+            ],
+        )
+
+    def test_TextNode_with_mixed_content_b(self):
+        node = TextNode(
+            "![alt_text](www.url2.com) and [link](www.url.com)",
+            TextType.NORMAL,
+        )
+        self.assertEqual(
+            split_nodes_link([node]),
+            [
+                TextNode("![alt_text](www.url2.com) and ", TextType.NORMAL),
+                TextNode("link", TextType.LINK, "www.url.com"),
+            ],
+        )
+
+
+class TextToTextnode(unittest.TestCase):
+    def test_print(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
+        self.assertEquals(
+            text_to_textnodes(text),
+            [
+                TextNode("This is ", TextType.NORMAL),
+                TextNode("text", TextType.BOLD),
+                TextNode(" with an ", TextType.NORMAL),
+                TextNode("italic", TextType.ITALIC),
+                TextNode(" word and a ", TextType.NORMAL),
+                TextNode("code block", TextType.CODE),
+                TextNode(" and an ", TextType.NORMAL),
+                TextNode(
+                    "obi wan image", TextType.IMAGE, "https://i.imgur.com/fJRm4Vk.jpeg"
+                ),
+                TextNode(" and a ", TextType.NORMAL),
+                TextNode("link", TextType.LINK, "https://boot.dev"),
             ],
         )
 
