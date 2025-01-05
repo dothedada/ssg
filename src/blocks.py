@@ -27,15 +27,20 @@ def markdown_to_blocks(markdown):
 def check_all_lines(regex, text):
     lines = filter(lambda item: item != "", text.split("\n"))
     count = 1
+
     for line in lines:
         match = re.match(regex, line)
+
         if not match:
             return False
+
         counter = re.match(r"^\d+", match.group(0))
         if not counter:
             continue
+
         if int(counter.group(0)) != count:
             return False
+
         count += 1
 
     return True
