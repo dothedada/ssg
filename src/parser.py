@@ -12,7 +12,7 @@ def text_to_children(text):
     return htmlnodes_childs
 
 
-def clean_text(text, chars):
+def clean_text(text, chars=""):
     lines = text.split("\n")
     chars_to_clean = chars + " "
     new_lines = []
@@ -42,15 +42,16 @@ def markdown_to_html_node(markdown):
                 children.append(code)
 
             case "quote":
-                text = clean_text(block, ">")
+                clean_block = clean_text(block, ">")
+                text = " ".join(clean_block.split("\n"))
                 block_childs = text_to_children(text)
                 children.append(ParentNode("blockquote", block_childs))
 
             case "unordered_list":
-                text = clean_text(block, "*-")
                 items = []
-                for item in text.split("\n"):
-                    item_childs = text_to_children(item)
+                for item in block.split("\n"):
+                    _, text = item.split(" ", 1)
+                    item_childs = text_to_children(clean_text(text))
                     items.append(ParentNode("li", item_childs))
                 children.append(ParentNode("ul", items))
 
@@ -58,11 +59,12 @@ def markdown_to_html_node(markdown):
                 items = []
                 for item in block.split("\n"):
                     _, text = item.split(" ", 1)
-                    item_childs = text_to_children(text)
+                    item_childs = text_to_children(clean_text(text))
                     items.append(ParentNode("li", item_childs))
                 children.append(ParentNode("ol", items))
 
             case "paragraph":
-                children.append(ParentNode("p", text_to_children(block)))
+                text = " ".join(block.split("\n"))
+                children.append(ParentNode("p", text_to_children(text)))
 
     return ParentNode("div", children)
