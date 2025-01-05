@@ -1,4 +1,14 @@
 import re
+from enum import Enum
+
+
+class BlockType(Enum):
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+    PARAGRAPH = "paragraph"
 
 
 def markdown_to_blocks(markdown):
@@ -14,6 +24,35 @@ def markdown_to_blocks(markdown):
     return blocks
 
 
+def check_all_lines(regex, text):
+    lines = filter(lambda item: item != "", text.split("\n"))
+    count = 1
+    for line in lines:
+        match = re.match(regex, line)
+        if not match:
+            return False
+        counter = re.match(r"^\d+", match.group(0))
+        if not counter:
+            continue
+        if int(counter.group(0)) != count:
+            return False
+        count += 1
+
+    return True
+
+
 def block_to_block_type(block):
-    pattern = r"^(#{1,6}|```|>|[*-]|\d+\.) *\w"
-    print(re.match(pattern, block))
+    if re.match(r"^#{1,6} ", block):
+        return "heading"
+    if re.match(r"^```[\s\S]*```$", block):
+        return "code"
+    if check_all_lines(r"^>", block):
+        return "quote"
+    if check_all_lines(r"^\* ", block):
+        return "unordered_list"
+    if check_all_lines(r"^\- ", block):
+        return "unordered_list"
+    if check_all_lines(r"^\d+\. ", block):
+        return "ordered_list"
+
+    return "paragraph"
