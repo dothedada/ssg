@@ -1,8 +1,18 @@
 import re
+from enum import Enum
 
 from htmlnode import ParentNode
 from splitnodesdelimiter import text_to_textnodes
 from textnode import text_node_to_html_node
+
+
+class BlockType(Enum):
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    ULIST = "unordered_list"
+    OLIST = "ordered_list"
+    PARAGRAPH = "paragraph"
 
 
 def markdown_to_blocks(markdown):
@@ -41,19 +51,19 @@ def check_all_lines(regex, text):
 
 def block_to_block_type(block):
     if re.match(r"^#{1,6} ", block):
-        return "heading"
+        return BlockType.HEADING
     if re.match(r"^```[\s\S]*```$", block):
-        return "code"
+        return BlockType.CODE
     if check_all_lines(r"^>", block):
-        return "quote"
+        return BlockType.QUOTE
     if check_all_lines(r"^\* ", block):
-        return "unordered_list"
+        return BlockType.ULIST
     if check_all_lines(r"^\- ", block):
-        return "unordered_list"
+        return BlockType.ULIST
     if check_all_lines(r"^\d+\. ", block):
-        return "ordered_list"
+        return BlockType.OLIST
 
-    return "paragraph"
+    return BlockType.PARAGRAPH
 
 
 def text_to_children(text):
@@ -111,12 +121,12 @@ def paragraph_to_html_node(block):
 
 
 block_parser_to_html_node = {
-    "heading": heading_to_html_node,
-    "code": code_to_html_node,
-    "quote": quote_to_html_node,
-    "unordered_list": list_type("ul"),
-    "ordered_list": list_type("ol"),
-    "paragraph": paragraph_to_html_node,
+    BlockType.HEADING: heading_to_html_node,
+    BlockType.CODE: code_to_html_node,
+    BlockType.QUOTE: quote_to_html_node,
+    BlockType.ULIST: list_type("ul"),
+    BlockType.OLIST: list_type("ol"),
+    BlockType.PARAGRAPH: paragraph_to_html_node,
 }
 
 

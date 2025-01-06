@@ -3,6 +3,7 @@ from blocks import (
     markdown_to_blocks,
     block_to_block_type,
     markdown_to_html_node,
+    BlockType,
 )
 from htmlnode import ParentNode
 
@@ -124,32 +125,32 @@ class ToBlockType(unittest.TestCase):
         block_h4 = "#### heading"
         block_h5 = "##### heading"
         block_h6 = "###### heading"
-        self.assertEqual(block_to_block_type(block_h1), "heading")
-        self.assertEqual(block_to_block_type(block_h2), "heading")
-        self.assertEqual(block_to_block_type(block_h3), "heading")
-        self.assertEqual(block_to_block_type(block_h4), "heading")
-        self.assertEqual(block_to_block_type(block_h5), "heading")
-        self.assertEqual(block_to_block_type(block_h6), "heading")
+        self.assertEqual(block_to_block_type(block_h1), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block_h2), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block_h3), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block_h4), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block_h5), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(block_h6), BlockType.HEADING)
 
     def test_heading_hash_must_have_space_from_text(self):
         block = "#heading 1"
-        self.assertEqual(block_to_block_type(block), "paragraph")
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
 
     def test_code_block_must_have_opening_and_closing_backticks(self):
         block = "```\ncode\n```"
-        self.assertEqual(block_to_block_type(block), "code")
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
 
     def test_block_must_start_with_3backtick_to_evaluate_as_code_block(self):
         block_a = "``\nno code"
-        self.assertEqual(block_to_block_type(block_a), "paragraph")
+        self.assertEqual(block_to_block_type(block_a), BlockType.PARAGRAPH)
 
     def test_all_lines_must_start_morethan_to_make_quote(self):
         block_a = "> 1\n> 2\n> 3"
         block_b = "> 1\n>2\n>3"
         block_c = ">1\n2\n> 3"
-        self.assertEqual(block_to_block_type(block_a), "quote")
-        self.assertEqual(block_to_block_type(block_b), "quote")
-        self.assertEqual(block_to_block_type(block_c), "paragraph")
+        self.assertEqual(block_to_block_type(block_a), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type(block_b), BlockType.QUOTE)
+        self.assertEqual(block_to_block_type(block_c), BlockType.PARAGRAPH)
 
     def test_all_lines_must_start_asteris_or_minus_and_space_to_make_ul(self):
         block_a = "* 1\n* 2\n* 3\n"
@@ -158,38 +159,38 @@ class ToBlockType(unittest.TestCase):
         block_d = "- 1\n- 2\n- 3\n"
         block_e = "- 1\n-2a\n - 3\n"
         block_f = "- 1\n- 2\n 3\n"
-        self.assertEqual(block_to_block_type(block_a), "unordered_list")
-        self.assertEqual(block_to_block_type(block_b), "paragraph")
-        self.assertEqual(block_to_block_type(block_c), "paragraph")
-        self.assertEqual(block_to_block_type(block_d), "unordered_list")
-        self.assertEqual(block_to_block_type(block_e), "paragraph")
-        self.assertEqual(block_to_block_type(block_f), "paragraph")
+        self.assertEqual(block_to_block_type(block_a), BlockType.ULIST)
+        self.assertEqual(block_to_block_type(block_b), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_c), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_d), BlockType.ULIST)
+        self.assertEqual(block_to_block_type(block_e), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_f), BlockType.PARAGRAPH)
 
     def test_all_items_in_ul_mustt_start_equal(self):
         block_g = "* 1\n* 2\n* 3\n"
         block_h = "- 1\n- 2\n- 3\n"
         block_i = "* 1\n- 2\n* 3\n"
         block_j = "- 1\n* 2\n- 3\n"
-        self.assertEqual(block_to_block_type(block_g), "unordered_list")
-        self.assertEqual(block_to_block_type(block_h), "unordered_list")
-        self.assertEqual(block_to_block_type(block_i), "paragraph")
-        self.assertEqual(block_to_block_type(block_j), "paragraph")
+        self.assertEqual(block_to_block_type(block_g), BlockType.ULIST)
+        self.assertEqual(block_to_block_type(block_h), BlockType.ULIST)
+        self.assertEqual(block_to_block_type(block_i), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_j), BlockType.PARAGRAPH)
 
     def test_all_lines_must_start_number_point_space_to_make_ol(self):
         block_a = "1. a\n2. b\n3. c"
         block_b = "1 .a\n2. a\n3. c"
         block_c = "1.\n 2. 3"
-        self.assertEqual(block_to_block_type(block_a), "ordered_list")
-        self.assertEqual(block_to_block_type(block_b), "paragraph")
-        self.assertEqual(block_to_block_type(block_c), "paragraph")
+        self.assertEqual(block_to_block_type(block_a), BlockType.OLIST)
+        self.assertEqual(block_to_block_type(block_b), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_c), BlockType.PARAGRAPH)
 
     def test_ol_must_start_1_and_add_1_in_each_item(self):
         block_a = "1. a\n2. b\n3. c"
         block_b = "2. a\n3. a\n4. c"
         block_c = "1. a\n2. b\n4. c"
-        self.assertEqual(block_to_block_type(block_a), "ordered_list")
-        self.assertEqual(block_to_block_type(block_b), "paragraph")
-        self.assertEqual(block_to_block_type(block_c), "paragraph")
+        self.assertEqual(block_to_block_type(block_a), BlockType.OLIST)
+        self.assertEqual(block_to_block_type(block_b), BlockType.PARAGRAPH)
+        self.assertEqual(block_to_block_type(block_c), BlockType.PARAGRAPH)
 
 
 class ParserFunctionality(unittest.TestCase):
