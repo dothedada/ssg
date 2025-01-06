@@ -12,8 +12,7 @@ def markdown_to_blocks(markdown):
     for section in re.split(pattern, markdown):
         if section.strip(" \t\n") == "":
             continue
-        else:
-            blocks.append(section.strip(" \t\n"))
+        blocks.append(section.strip(" \t\n"))
 
     return blocks
 
@@ -74,49 +73,59 @@ def clean_text(text, chars=""):
     return "\n".join(new_lines)
 
 
+def heading_to_html_node(block):
+    h_level, text = block.split(" ", 1)
+    block_childs = text_to_children(text)
+    return ParentNode(f"h{len(h_level)}", block_childs)
+
+
+def code_to_html_node(block):
+    block_childs = text_to_children(block.strip("`"))
+    return ParentNode("pre", [ParentNode("code", block_childs)])
+
+
+def quote_to_html_node(block):
+    clean_block = clean_text(block, ">")
+    text = " ".join(clean_block.split("\n"))
+    block_childs = text_to_children(text)
+    return ParentNode("blockquote", block_childs)
+
+
+def list_type(tag):
+    def list_to_html_node(block):
+        items = []
+
+        for item in block.split("\n"):
+            _, text = item.split(" ", 1)
+            item_childs = text_to_children(clean_text(text))
+            items.append(ParentNode("li", item_childs))
+
+        return ParentNode(tag, items)
+
+    return list_to_html_node
+
+
+def paragraph_to_html_node(block):
+    text = " ".join(block.split("\n"))
+    return ParentNode("p", text_to_children(text))
+
+
+block_parser_to_html_node = {
+    "heading": heading_to_html_node,
+    "code": code_to_html_node,
+    "quote": quote_to_html_node,
+    "unordered_list": list_type("ul"),
+    "ordered_list": list_type("ol"),
+    "paragraph": paragraph_to_html_node,
+}
+
+
 def markdown_to_html_node(markdown):
     blocks = markdown_to_blocks(markdown)
     children = []
 
     for block in blocks:
         block_type = block_to_block_type(block)
-
-        match block_type:
-            case "heading":
-                h_level, text = block.split(" ", 1)
-                block_childs = text_to_children(text)
-                heading = ParentNode(f"h{len(h_level)}", block_childs)
-                children.append(heading)
-
-            case "code":
-                block_childs = text_to_children(block.strip("`\n "))
-                code = ParentNode("pre", [ParentNode("code", block_childs)])
-                children.append(code)
-
-            case "quote":
-                clean_block = clean_text(block, ">")
-                text = " ".join(clean_block.split("\n"))
-                block_childs = text_to_children(text)
-                children.append(ParentNode("blockquote", block_childs))
-
-            case "unordered_list":
-                items = []
-                for item in block.split("\n"):
-                    _, text = item.split(" ", 1)
-                    item_childs = text_to_children(clean_text(text))
-                    items.append(ParentNode("li", item_childs))
-                children.append(ParentNode("ul", items))
-
-            case "ordered_list":
-                items = []
-                for item in block.split("\n"):
-                    _, text = item.split(" ", 1)
-                    item_childs = text_to_children(clean_text(text))
-                    items.append(ParentNode("li", item_childs))
-                children.append(ParentNode("ol", items))
-
-            case "paragraph":
-                text = " ".join(block.split("\n"))
-                children.append(ParentNode("p", text_to_children(text)))
+        children.append(block_parser_to_html_node[block_type](block))
 
     return ParentNode("div", children)
