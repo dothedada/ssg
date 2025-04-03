@@ -16,7 +16,10 @@ def split_nodes_delimiter(old_nodes, delimiter, type_text):
         text_split = node.text.split(delimiter)
 
         if len(text_split) % 2 == 0:
-            raise Exception("Invalid Markdown syntax, not closed section")
+            print(text_split)
+            raise Exception(
+                f"Invalid Markdown syntax, not closed section found in {text_split}"
+            )
 
         for i in range(len(text_split)):
             if not text_split[i]:
@@ -122,7 +125,7 @@ def text_to_textnodes(text):
     nodes = []
     nodes.append(TextNode(text, TextType.NORMAL))
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
-    nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
     nodes = split_nodes_link(nodes)
     nodes = split_nodes_image(nodes)
