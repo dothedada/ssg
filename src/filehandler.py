@@ -20,10 +20,10 @@ def duplicate_directory(origin, destiny):
             shutil.copy(new_path_origin, new_path_destiny)
 
 
-def static_files_handler():
+def static_files_handler(dir_path_public):
     path = os.getcwd()
     path_origin = os.path.join(path, "static")
-    path_destiny = os.path.join(path, "public")
+    path_destiny = os.path.join(path, "docs")
 
     if os.path.exists(path_destiny):
         shutil.rmtree(path_destiny)
